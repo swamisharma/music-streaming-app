@@ -1,23 +1,22 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import app from './app';
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT ?? 3000;
+// connect to database
 
-app.get('/', (_req, res) => {
-  res.json({ message: 'Music Streaming API is running...!' });
-});
-
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    env: process.env.NODE_ENV,
-    port: PORT,
-  });
-});
-
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("Closing database...");
+
+  // await database.disconnect();
+
+  server.close(() => {
+    process.exit(0);
+  });
 });
